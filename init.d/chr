@@ -42,12 +42,22 @@ start() {
 	mount --rbind "${GLOBAL_DISTFILES}" "${CHR_DIR}/${CHR_DISTFILES}"
 
 	cp --dereference /etc/resolv.conf "${CHR_DIR}/etc/"
-	echo "export PS1=\"(${CHR}) \$\{PS1\}\"" > "${CHR_DIR}/etc/bash/bashrc.d/chr"
+	echo "export PS1=\"(${CHR} chroot) \${PS1}\"" > "${CHR_DIR}/etc/bash/bashrc.d/chr"
 	chmod +x "${CHR_DIR}/etc/bash/bashrc.d/chr"
+
+	cat > "/usr/bin/chr.${CHR}" <<-ENTERBIN
+		#!/bin/bash
+		echo "Entering ${CHR} chroot ..."
+		nice chroot "${CHR_DIR}" /bin/bash --login
+		echo "Leaving ${CHR} chroot ..."
+	ENTERBIN
+	chmod +x "/usr/bin/chr.${CHR}"
 }
 
 stop() {
 	checkconfig || return $?
+
+	rm "/usr/bin/chr.${CHR}"
 
 	umount "${CHR_DIR}/${CHR_DISTFILES}"
 	umount "${CHR_DIR}/${CHR_GENTOO}"
