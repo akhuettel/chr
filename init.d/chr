@@ -1,0 +1,58 @@
+#!/sbin/openrc-run
+# Copyright 2020 Andreas K. Hüttel
+# Distributed under the terms of the GNU General Public License v2
+
+CHR="${RC_SVCNAME#*.}"
+
+CHR_BASEDIR="/chroot"
+
+CHR_DIR="${CHR_BASEDIR}/$CHR"
+
+GLOBAL_GENTOO="/var/db/repos/gentoo"
+GLOBAL_DISTFILES="/var/cache/distfiles"
+
+CHR_GENTOO="/var/db/repos/gentoo"
+CHR_DISTFILES="/var/cache/distfiles"
+
+depend() {
+	need localmount udev syslog
+	after qemu-binfmt
+}
+
+checkconfig() {
+	if [ ${CHR} = "chr" ]; then
+		eerror "You cannot call chr directly. You must create a symbolic link to it with the chroot name:"
+		eerror "	ln -s /etc/init.d/chr /etc/init.d/chr.amd64-stable"
+		eerror "And then call that instead:"
+		eerror "	/etc/init.d/chr.amd64-stable start"
+		return 1
+	fi
+}
+
+start() {
+	checkconfig || return $?
+
+	mount --types proc /proc "${CHR_DIR}/proc"
+	mount --rbind /sys "${CHR_DIR}/sys"
+	mount --make-rslave "${CHR_DIR}/sys"
+	mount --rbind /dev "${CHR_DIR}/dev"
+	mount --make-rslave "${CHR_DIR}/dev"
+
+	mount --rbind "${GLOBAL_GENTOO}" "${CHR_DIR}/${CHR_GENTOO}"
+	mount --rbind "${GLOBAL_DISTFILES}" "${CHR_DIR}/${CHR_DISTFILES}"
+
+	cp --dereference /etc/resolv.conf "${CHR_DIR}/etc/"
+	echo "export PS1=\"(${CHR}) \$\{PS1\}\"" > "${CHR_DIR}/etc/bash/bashrc.d/chr"
+	chmod +x "${CHR_DIR}/etc/bash/bashrc.d/chr"
+}
+
+stop() {
+	checkconfig || return $?
+
+	umount "${CHR_DIR}/${CHR_DISTFILES}"
+	umount "${CHR_DIR}/${CHR_GENTOO}"
+
+	umount "${CHR_DIR}/dev"
+	umount "${CHR_DIR}/sys"
+	umount "${CHR_DIR}/proc"
+}
