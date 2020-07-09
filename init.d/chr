@@ -15,7 +15,7 @@ CHR_GENTOO="/var/db/repos/gentoo"
 CHR_DISTFILES="/var/cache/distfiles"
 
 depend() {
-	need localmount udev syslog
+	need localmount udev logger
 	after qemu-binfmt
 }
 
@@ -52,7 +52,7 @@ stop() {
 	umount "${CHR_DIR}/${CHR_DISTFILES}"
 	umount "${CHR_DIR}/${CHR_GENTOO}"
 
-	umount "${CHR_DIR}/dev"
-	umount "${CHR_DIR}/sys"
-	umount "${CHR_DIR}/proc"
+	umount -R "${CHR_DIR}/dev"
+	umount -R "${CHR_DIR}/sys"
+	umount -R "${CHR_DIR}/proc"
 }
