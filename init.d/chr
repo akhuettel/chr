@@ -45,13 +45,24 @@ start() {
 	echo "export PS1=\"(${CHR} chroot) \${PS1}\"" > "${CHR_DIR}/etc/bash/bashrc.d/chr"
 	chmod +x "${CHR_DIR}/etc/bash/bashrc.d/chr"
 
-	cat > "/usr/bin/chr.${CHR}" <<-ENTERBIN
+	cat > "/usr/bin/chr.${CHR}" <<-OUTERBIN
 		#!/bin/bash
 		echo "Entering ${CHR} chroot ..."
-		nice chroot "${CHR_DIR}" /bin/bash --login
+		nice chroot "${CHR_DIR}" /bin/bash "/.chr.enter"
 		echo "Leaving ${CHR} chroot ..."
-	ENTERBIN
+	OUTERBIN
 	chmod +x "/usr/bin/chr.${CHR}"
+
+	cat > "${CHR_DIR}/.chr.enter" <<-INNERBIN
+		echo System is `uname -m`
+		env-update
+		echo Starting chroot shell.
+		echo
+		/bin/bash --login
+		echo
+		echo Chroot shell was closed.
+	INNERBIN
+	chmod +x "${CHR_DIR}/.chr.enter"
 }
 
 stop() {
