@@ -2,17 +2,22 @@
 # Copyright 2020 Andreas K. Hüttel
 # Distributed under the terms of the GNU General Public License v2
 
-CHR="${RC_SVCNAME#*.}"
+CHR=${RC_SVCNAME#*.}
+CHRM=${CHR/-/_}
 
-CHR_BASEDIR="/chroot"
+CHR_BASEDIR=${basedir:-/chroot}
 
-CHR_DIR="${CHR_BASEDIR}/$CHR"
+myvar=dir_${CHRM}
+CHR_DIR=${!myvar:-${CHR_BASEDIR}/${CHR}}
 
 GLOBAL_GENTOO="/var/db/repos/gentoo"
 GLOBAL_DISTFILES="/var/cache/distfiles"
 
 CHR_GENTOO="/var/db/repos/gentoo"
 CHR_DISTFILES="/var/cache/distfiles"
+
+myvar=callchain_${CHRM}
+CHR_CALLCHAIN=${!myvar:-nice}
 
 depend() {
 	need localmount udev logger
@@ -48,7 +53,7 @@ start() {
 	cat > "/usr/bin/chr.${CHR}" <<-OUTERBIN
 		#!/bin/bash
 		echo "Entering ${CHR} chroot ..."
-		nice chroot "${CHR_DIR}" /bin/bash "/.chr.enter"
+		${CHR_CALLCHAIN} chroot "${CHR_DIR}" /bin/bash "/.chr.enter"
 		echo "Leaving ${CHR} chroot ..."
 	OUTERBIN
 	chmod +x "/usr/bin/chr.${CHR}"

@@ -1,0 +1,4 @@
+# example configuration file, please adapt
+
+callchain_x86_stable="nice linux32"
+callchain_x86_testing="nice linux32"
