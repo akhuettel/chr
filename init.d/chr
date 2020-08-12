@@ -10,8 +10,8 @@ CHR_BASEDIR=${basedir:-/chroot}
 myvar=dir_${CHRM}
 CHR_DIR=${!myvar:-${CHR_BASEDIR}/${CHR}}
 
-GLOBAL_GENTOO="/var/db/repos/gentoo"
-GLOBAL_DISTFILES="/var/cache/distfiles"
+GLOBAL_GENTOO=${gentoodir:-/var/db/repos/gentoo}
+GLOBAL_DISTFILES=${distdir:-/var/cache/distfiles}
 
 CHR_GENTOO="/var/db/repos/gentoo"
 CHR_DISTFILES="/var/cache/distfiles"
