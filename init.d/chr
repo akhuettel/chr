@@ -59,7 +59,7 @@ start() {
 	chmod +x "/usr/bin/chr.${CHR}"
 
 	cat > "${CHR_DIR}/.chr.enter" <<-INNERBIN
-		echo System is `uname -m`
+		echo System is \`uname -m\`
 		env-update
 		echo Starting chroot shell.
 		echo
